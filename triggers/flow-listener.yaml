@@ -1,0 +1,12 @@
+triggers:
+  flow-listener-1:
+    name: Flow Listener
+    parameters:
+      id: getquote
+    enabled: true
+    invoke:
+      flow: GetStockQuote
+      parameters:
+        request: $.request
+        config: $.config
+        env: $.env

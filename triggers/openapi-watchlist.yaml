@@ -1,0 +1,12 @@
+triggers:
+  openapi-watchlist-1:
+    name: get-watchlist
+    parameters:
+      method: get-watchlist
+    enabled: true
+    invoke:
+      flow: get-watchlist
+      parameters:
+        request: $.request
+        config: $.config
+        env: $.env

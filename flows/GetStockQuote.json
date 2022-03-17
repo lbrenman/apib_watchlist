@@ -1,0 +1,245 @@
+{
+	"schemaVersion": "4",
+	"info": {
+		"name": "Get Stock Quote",
+		"description": ""
+	},
+	"parameter": {
+		"properties": {
+			"request": {
+				"description": "The request"
+			},
+			"config": {
+				"type": "object",
+				"description": "The service's configuration"
+			},
+			"env": {
+				"type": "object",
+				"description": "The host OS environment"
+			}
+		},
+		"additionalProperties": false
+	},
+	"start": "javascript.1",
+	"nodes": {
+		"javascript.1": {
+			"type": "nodehandler://@axway/api-builder-plugin-fn-javascript/javascript",
+			"name": "prepareGetStockQuote",
+			"method": "Execute",
+			"parameters": [
+				{
+					"name": "data",
+					"type": "jsonpath",
+					"value": "$",
+					"metaName": "Data",
+					"metaDescription": "The value to apply as the `data` argument of the JavaScript code. For objects and arrays, `data` is passed by reference."
+				},
+				{
+					"name": "code",
+					"type": "string",
+					"value": "\"let url='https://yfapi.net/v6/finance/quote?region=US&lang=en&symbols=';\\n  url+=data.request;\\n\\n  let headers = {\\n    \\\"X-API-KEY\\\": process.env.YAHOO_FINANCE_APIKEY\\n  };\\n\\n  return {url, headers};\""
+				}
+			],
+			"outputs": {
+				"next": {
+					"context": "$.prepareGetStockQuote.result",
+					"routes": [
+						"rest.1"
+					],
+					"metaName": "Next"
+				},
+				"error": {
+					"context": "$.prepareGetStockQuote.error",
+					"routes": [],
+					"metaName": "Error"
+				}
+			},
+			"metaMethod": "Execute"
+		},
+		"rest.1": {
+			"type": "nodehandler://@axway/api-builder-plugin-fn-restclient/rest",
+			"name": "GetQuote",
+			"method": "get",
+			"parameters": [
+				{
+					"name": "url",
+					"type": "jsonpath",
+					"value": "$.prepareGetStockQuote.result.url",
+					"metaName": "URL",
+					"metaDescription": "The target URL."
+				},
+				{
+					"name": "headers",
+					"type": "jsonpath",
+					"value": "$.prepareGetStockQuote.result.headers",
+					"metaName": "Headers",
+					"metaDescription": "The HTTP headers to set."
+				}
+			],
+			"outputs": {
+				"2xx": {
+					"routes": [
+						"condition.1"
+					],
+					"context": "$.GetQuote.response",
+					"metaName": "2XX"
+				},
+				"3xx": {
+					"routes": [
+						"invoke-flow-response.1"
+					],
+					"context": "$.response",
+					"metaName": "3XX"
+				},
+				"4xx": {
+					"routes": [
+						"invoke-flow-response.1"
+					],
+					"context": "$.response",
+					"metaName": "4XX"
+				},
+				"5xx": {
+					"routes": [
+						"invoke-flow-response.1"
+					],
+					"context": "$.response",
+					"metaName": "5XX"
+				},
+				"error": {
+					"routes": [
+						"invoke-flow-response.1"
+					],
+					"context": "$.response",
+					"metaName": "Error"
+				}
+			},
+			"metaMethod": "GET"
+		},
+		"invoke-flow-response.1": {
+			"type": "nodehandler://@axway/api-builder-plugin-invoke-flow/invoke-flow-response",
+			"name": "Set Response",
+			"method": "setResponse",
+			"parameters": [
+				{
+					"name": "data",
+					"type": "jsonpath",
+					"value": "$.response",
+					"metaName": "Data",
+					"metaDescription": "The result to be returned to the flow that called `Invoke Flow`."
+				}
+			],
+			"outputs": {
+				"next": {
+					"context": "$.response",
+					"routes": [],
+					"metaName": "Next"
+				},
+				"error": {
+					"context": "$.error",
+					"routes": [],
+					"metaName": "Error"
+				}
+			},
+			"metaMethod": "Set Response"
+		},
+		"condition.1": {
+			"type": "nodehandler://axway-flow/condition",
+			"name": "Exists",
+			"method": "exists",
+			"parameters": [
+				{
+					"name": "source",
+					"type": "jsonpath",
+					"value": "$.GetQuote.response.body.quoteResponse.result[0]",
+					"metaName": "Source",
+					"metaDescription": "The input to test."
+				}
+			],
+			"outputs": {
+				"true": {
+					"routes": [
+						"javascript.2"
+					],
+					"context": "$.response",
+					"metaName": "True"
+				},
+				"false": {
+					"routes": [
+						"invoke-flow-response.2"
+					],
+					"context": "$.response",
+					"metaName": "False"
+				}
+			},
+			"metaMethod": "Exists"
+		},
+		"invoke-flow-response.2": {
+			"type": "nodehandler://@axway/api-builder-plugin-invoke-flow/invoke-flow-response",
+			"name": "Set Response",
+			"method": "setResponse",
+			"parameters": [
+				{
+					"name": "isError",
+					"type": "boolean",
+					"value": "false",
+					"metaName": "Is Error",
+					"metaDescription": "Indicates that the response is an error.  This will cause the `Invoke Flow` to trigger the `Error` output with this value."
+				},
+				{
+					"name": "data",
+					"type": "jsonpath",
+					"value": "$.response",
+					"metaName": "Data",
+					"metaDescription": "The result to be returned to the flow that called `Invoke Flow`."
+				}
+			],
+			"outputs": {
+				"next": {
+					"context": "$.response",
+					"routes": [],
+					"metaName": "Next"
+				},
+				"error": {
+					"context": "$.error",
+					"routes": [],
+					"metaName": "Error"
+				}
+			},
+			"metaMethod": "Set Response"
+		},
+		"javascript.2": {
+			"type": "nodehandler://@axway/api-builder-plugin-fn-javascript/javascript",
+			"name": "modifyResponse",
+			"method": "Execute",
+			"parameters": [
+				{
+					"name": "data",
+					"type": "jsonpath",
+					"value": "$.GetQuote.response.body.quoteResponse.result[0]",
+					"metaName": "Data",
+					"metaDescription": "The value to apply as the `data` argument of the JavaScript code. For objects and arrays, `data` is passed by reference."
+				},
+				{
+					"name": "code",
+					"type": "string",
+					"value": "\"let response = {};\\n  \\n  response.symbol = data.symbol;\\n  response.lastPrice = data.regularMarketPrice;\\n  response.change = data.regularMarketChange;\\n  \\n  return response;\""
+				}
+			],
+			"outputs": {
+				"next": {
+					"context": "$.response",
+					"routes": [
+						"invoke-flow-response.1"
+					],
+					"metaName": "Next"
+				},
+				"error": {
+					"context": "$.error",
+					"routes": [],
+					"metaName": "Error"
+				}
+			},
+			"metaMethod": "Execute"
+		}
+	}
+}
