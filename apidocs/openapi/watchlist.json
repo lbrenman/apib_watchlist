@@ -71,12 +71,17 @@
         "parameters": [
           {
             "schema": {
-              "type": "string"
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
             },
             "in": "query",
+            "explode": false,
             "name": "stocklist",
             "description": "Comma separated list of stock symbols (e.g. aapl,txn,amzn)",
-            "required": true
+            "required": true,
+            "style": "form"
           }
         ]
       }
@@ -100,29 +105,11 @@
           "change": {
             "type": "number"
           }
-        },
-        "examples": [
-          {
-            "symbol": "AAPL",
-            "lastPrice": 157.58,
-            "change": 2.4900055
-          }
-        ]
+        }
       }
     },
-    "securitySchemes": {
-      "API Key - 1": {
-        "name": "apikey",
-        "type": "apiKey",
-        "in": "header"
-      }
-    }
+    "securitySchemes": {}
   },
-  "security": [
-    {
-      "API Key - 1": []
-    }
-  ],
   "tags": [
     {
       "name": "Watch List"

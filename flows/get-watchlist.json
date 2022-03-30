@@ -19,7 +19,7 @@
 		},
 		"additionalProperties": false
 	},
-	"start": "javascript.2",
+	"start": "invoke-flow.1",
 	"nodes": {
 		"http.1": {
 			"type": "nodehandler://axway-flow/http",
@@ -65,7 +65,7 @@
 				{
 					"name": "items",
 					"type": "jsonpath",
-					"value": "$.result",
+					"value": "$.request.query.stocklist",
 					"metaName": "Items",
 					"metaDescription": "An array of input items where each item will be passed as request data when invoking the flow."
 				}
@@ -103,7 +103,9 @@
 				{
 					"name": "code",
 					"type": "string",
-					"value": "\"let reply = [];\\n  data.response.forEach(function(item){\\n    if(item){\\n      reply.push(item);\\n    }\\n  });\\n  \\n  return(reply);\""
+					"value": "\"let reply = [];\\n  data.response.forEach(function(item){\\n    if(item){\\n      reply.push(item);\\n    }\\n  });\\n  \\n  return(reply);\"",
+					"metaName": "Code",
+					"metaDescription": "A JavaScript function body. Supports `await` and returning promises. `data` is the value of the Data parameter. `logger` is the API Builder logger. See the docs for more info: https://docs.axway.com/bundle/api-builder/page/docs/developer_guide/flows/flow_nodes/javascript_flow_node/index.html"
 				}
 			],
 			"outputs": {
@@ -152,40 +154,6 @@
 				}
 			},
 			"metaMethod": "Set HTTP Response"
-		},
-		"javascript.2": {
-			"type": "nodehandler://@axway/api-builder-plugin-fn-javascript/javascript",
-			"name": "Convert Query Parameters",
-			"method": "Execute",
-			"parameters": [
-				{
-					"name": "data",
-					"type": "jsonpath",
-					"value": "$",
-					"metaName": "Data",
-					"metaDescription": "The value to apply as the `data` argument of the JavaScript code. For objects and arrays, `data` is passed by reference."
-				},
-				{
-					"name": "code",
-					"type": "string",
-					"value": "\"return data.request.query.stocklist.split(',');\""
-				}
-			],
-			"outputs": {
-				"next": {
-					"context": "$.result",
-					"routes": [
-						"invoke-flow.1"
-					],
-					"metaName": "Next"
-				},
-				"error": {
-					"context": "$.error",
-					"routes": [],
-					"metaName": "Error"
-				}
-			},
-			"metaMethod": "Execute"
 		}
 	}
 }
